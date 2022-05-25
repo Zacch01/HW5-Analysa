@@ -64,6 +64,101 @@ def recurssiveNeville(points, m, n, toFind):
     return (((toFind - xm) * recurssiveNeville(points, m + 1, n, toFind)) - ((toFind - xn) * recurssiveNeville(points, m, n - 1, toFind))) / (xn - xm)
 
 
+def cubicSpline(points, toFind, derived1, derived2):
+    h = [0 for i in range(len(points))]
+    lam = [0 for i in range(len(points))]
+    u = [0 for i in range(len(points))]
+    d = [0 for i in range(len(points))]
+    for i in range(len(points) - 1):
+        h[i] = (points[i + 1][0] - points[i][0])
+
+    for i in range(1, len(points)):
+        lam[i] = h[i] / (h[i - 1] + h[i])
+        u[i] = 1 - lam[i]
+
+    for i in range(1, len(points)):
+        d[i] = (6 / h[i - 1]) * (derived2- (points[i][1] - points[i - 1][1])/ h[0])
+
+    d[0] = (6 / h[0]) * (((points[1][1]-points[0][1])/h[0]) - derived1)
+    u[len(points) - 1] = lam[0] = 1
+
+    matrix = [[0 for col in range(len(points))] for row in range(len(points))]
+    vector = [[d[row] for _ in range(1)] for row in range(len(points))]
+    matrix[0][0] = matrix[len(points)-1][len(points)-1] = 2
+    matrix[0][1], matrix[len(points)-1][len(points)-2] = lam[0], u[len(points)-1]
+    for row in range(1, len(matrix)-1):
+        for col in range(1, len(matrix)-1):
+            if row == col:
+                matrix[row][col] = 2
+                matrix[row][col - 1] = u[row]
+                matrix[row][col+1] = lam[row]
+                break
+
+    p1 = 0
+    p2 = len(points) - 1
+    for i in range(len(points)):
+        if toFind > points[i][0] > points[p1][0]:
+            p1 = i
+        if toFind < points[i][0] < points[p2][0]:
+            p2 = i
+
+
+    M = GaussSeidel(matrix, vector)
+    s = ((((points[p2][0] - toFind) ** 3) * M[p1][0] + ((toFind - points[p1][0]) ** 3) * M[p2][0]) / (6 * h[p1])) + (((points[p2][0] - toFind) * points[p1][1] + (toFind - points[p1][0]) * points[p2][1]) / h[p1]) - (((points[p2][0] - toFind) * M[p1][0] + (toFind - points[p1][0]) * M[p2][0]) * h[p1]) / 6
+    print("*** Cubic Spline's_Algorithm ***")
+    print("Approximate value = ", s)
+    print("---------------------------------")
+
+
+def cubicSplineNatural(points, toFind):
+    h = [0 for i in range(len(points))]
+    lam = [0 for i in range(len(points))]
+    u = [0 for i in range(len(points))]
+    d = [0 for i in range(len(points))]
+    for i in range(len(points)-1):
+        h[i] = (points[i+1][0] - points[i][0])
+
+    for i in range(1, len(points)):
+        lam[i] = h[i] / (h[i-1] + h[i])
+        u[i] = 1 - lam[i]
+
+    for i in range(1, len(points)-1):
+        d[i] = (6/(h[i-1]+h[i]))*((points[i+1][1]-points[i][1])/h[i] - (points[i][1]-points[i-1][1])/h[i-1])
+
+    d[len(points) - 1] = d[0] = u[len(points) - 1] = lam[0] = 0
+
+    matrix = [[0 for col in range(len(points))] for row in range(len(points))]
+    vector = [[d[row] for _ in range(1)] for row in range(len(points))]
+    for row in range(len(matrix)-1):
+        for col in range(len(matrix)-1):
+            if row == col:
+                matrix[row][col] = 2
+                matrix[row][col + 1] = lam[row]
+                matrix[row + 1][col] = u[row+1]
+
+    p1 = 0
+    p2 = len(points) - 1
+    for i in range(len(points)):
+        if toFind > points[i][0] > points[p1][0]:
+            p1 = i
+        if toFind < points[i][0] < points[p2][0]:
+            p2 = i
+
+
+    matrix2 = [[0 for col in range(len(matrix)-2)] for row in range(len(matrix)-2)]
+    for row in range(1, len(matrix)-1):
+        for col in range(1, len(matrix)-1):
+            matrix2[row-1][col-1]=matrix[row][col]
+    vector2 = [[d[row] for _ in range(1)] for row in range(1, len(points)-1)]
+
+    coefficient = GaussSeidel(matrix2, vector2)
+    M = [[0 for _ in range(1)] for row in range(len(points))]
+    for row in range(1, len(points)-1):
+        M[row][0] = coefficient[row-1][0]
+    s = ((((points[p2][0] - toFind)**3)*M[p1][0] + ((toFind - points[p1][0])**3)*M[p2][0])/(6 * h[p1])) + (((points[p2][0] - toFind)*points[p1][1] + (toFind - points[p1][0])*points[p2][1])/h[p1]) - (((points[p2][0] - toFind)*M[p1][0] + (toFind - points[p1][0])*M[p2][0])*h[p1])/6
+    print("*** Cubic Spline's_Algorithm ***")
+    print("Approximate value = ", s)
+    print("---------------------------------")
 
 
 
@@ -87,3 +182,8 @@ Neville(points, toFind)
 
 points = [[0, 0], [pi/6, 0.5], [pi/4, 0.7072], [pi/2, 1]]
 toFind = pi/3
+cubicSplineNatural(points , toFind)
+
+points = [[0, 0], [pi/6, 0.5], [pi/4, 0.7072], [pi/2, 1]]
+toFind = pi/3
+cubicSpline(points , toFind, 1, 0)
