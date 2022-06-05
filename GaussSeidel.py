@@ -26,7 +26,7 @@ def GaussSeidel(originMatrix, originVectorB):
             currentIteration = [[0 for _ in range(1)] for _ in range(len(originMatrix))]
 
             # Loop for finding the solution
-            for _ in range(500):
+            for _ in range(300):
 
                 # Calculate the next guess
                 for i in range(len(originMatrix)):
@@ -36,7 +36,6 @@ def GaussSeidel(originMatrix, originVectorB):
                             rowSum = rowSum + originMatrix[i][j] * currentIteration[j][0]
                     currentIteration[i][0] = (originVectorB[i][0] - rowSum) / originMatrix[i][i]
 
-
                 # In case we found the solution, Stop the program
                 if all([False if abs(currentIteration[row][0] - prevIteration[row][0]) > ACCURACY else True for row in range(len(currentIteration))]):
                     break
@@ -45,11 +44,10 @@ def GaussSeidel(originMatrix, originVectorB):
                 prevIteration = [[currentIteration[row][0] for _ in range(1)] for row in range(len(currentIteration))]
 
                 # According message in case the Matrix is not converge
-                if _ == 499:
+                if _ == 299:
                     return None
-
             # Saving the Linear Equation final solution
-            return currentIteration
+            return list(map(lambda x: x[0], currentIteration))
 
         # According message In case there is more or less than one solution
         else:
@@ -68,24 +66,14 @@ def organizeMatrix(originMatrix, originVectorB):
     :param originVectorB: Nx1 vector
     :return: The updated Linear Equation
     """
-    # Saving the Linear Equation the user gave
-    LinearEquation = [[originMatrix[row][col] for col in range(len(originMatrix[0]))] for row in range(len(originMatrix))]
-    [LinearEquation[row].append(originVectorB[row][0]) for row in range(len(originVectorB))]
-
-    # Iteration Variable
-    i = 0
-
     # Loop to get the highest pivots possible
-    while i < len(originMatrix):
+    for i in range(len(originMatrix)):
 
         # Variable to store the highest value for the pivot
         maxPivot = abs(originMatrix[i][i])
 
         # Variable to store the new pivot row
         pivotRow = -1
-
-        # Variable to store the new pivot column
-        pivotCol = -1
 
         # Searching the highest potential Pivot for originMatrix[i][i]
         for j in range(i + 1, len(originMatrix)):
@@ -94,24 +82,11 @@ def organizeMatrix(originMatrix, originVectorB):
             if abs(originMatrix[j][i]) > maxPivot:
                 maxPivot = abs(originMatrix[j][i])
                 pivotRow = j
-                pivotCol = -1
-
-            # In case there's a higher pivot (on the Row[i])
-            if abs(originMatrix[i][j]) > maxPivot:
-                maxPivot = abs(originMatrix[i][j])
-                pivotCol = j
-                pivotRow = -1
 
         # In case there was a higher pivot, change the matrix so the Pivot will be the maximum
         if maxPivot != abs(originMatrix[i][i]):
-
-            # In case the highest pivot is on the Rows
-            if pivotRow > pivotCol:
-                originVectorB[i], originVectorB[pivotRow] = originVectorB[pivotRow], originVectorB[i]
-                originMatrix[i], originMatrix[pivotRow] = originMatrix[pivotRow], originMatrix[i]
-
-        # Next iteration
-        i = i + 1
+            originVectorB[i], originVectorB[pivotRow] = originVectorB[pivotRow], originVectorB[i]
+            originMatrix[i], originMatrix[pivotRow] = originMatrix[pivotRow], originMatrix[i]
 
     # Return the updated Linear Equation
     return originMatrix, originVectorB
@@ -124,6 +99,7 @@ def isDiagonalDominant(matrix):
 
     """
     for i in range(len(matrix)):
+
         # Variable to store, the summation of absolute row [i]
         rowSum = 0
         for j in range(len(matrix)):
