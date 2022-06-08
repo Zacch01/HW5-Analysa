@@ -359,7 +359,9 @@ def polynomial(points, toFind):
         if coefficient is None:
             print('Cant solve the polynomial')
             return
-
+    print("Vector coefficients")
+    print(coefficient)
+    print()
     value = 0.0
     for x in range(len(coefficient)):
         value += coefficient[x] * (toFind ** x)
@@ -429,10 +431,14 @@ def recursiveNeville(pointsList, xToFind, i, j):
     # Saving the calculation of P[i + 1][j]
     if P[i + 1][j] is None:
         P[i + 1][j] = recursiveNeville(pointsList, xToFind, i + 1, j)
-
+        print("Recursive Neville")
+        print(P[i + 1][j])
     # Saving the calculation of P[i][j - 1]
     if P[i][j - 1] is None:
         P[i][j - 1] = recursiveNeville(pointsList, xToFind, i, j - 1)
+        print("Recursive Neville")
+        print(P[i][j - 1])
+
 
     # Create a sub calculating
     return ((xToFind - pointsList[i][0]) * P[i + 1][j] - (xToFind - pointsList[j][0]) * P[i][j - 1]) / (pointsList[j][0] - pointsList[i][0])
@@ -575,8 +581,8 @@ toFind = pi/3
 cubicSplineNatural(points, toFind)
 """
 
-table_points = [[0, 0], [pi/6, 0.5], [pi/4, 0.7072], [pi/2, 1]]
-XtoFind = pi/3
+table_points = [[1.2, 1.5095], [1.3, 1.6984], [1.4, 1.9043], [1.5, 2.1293], [1.6, 2.3756]]
+XtoFind = 1.47
 functionDerived1 = 1
 functionDerived2 = 0
 
